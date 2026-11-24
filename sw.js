@@ -1,5 +1,5 @@
 // Guarda la app en el teléfono para que abra sin internet. Cambiar VERSION en cada actualización.
-const VERSION = 'rr-v2'
+const VERSION = 'rr-v3'
 const ARCHIVOS = ['./', 'index.html', 'app.css', 'app.js', 'datos-prueba.js', 'manifest.webmanifest', 'icono.svg', 'icono-192.png', 'icono-512.png']
 
 self.addEventListener('install', e => {

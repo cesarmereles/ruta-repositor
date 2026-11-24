@@ -89,6 +89,10 @@
     if (!E.sesion || E.sesion.fecha !== hoy()) {
       $('ingreso-nombre').textContent = `Hola, ${E.ruta.repositor.nombre}`
       $('in-pin').value = ''
+      // Ruta de ejemplo: los datos de prueba son públicos (están en datos-prueba.js), se muestran para poder entrar
+      const demo = E.ruta.repositor.id === RUTA_PRUEBA.repositor.id
+      $('ingreso-prueba').hidden = !demo
+      if (demo) $('ingreso-prueba').textContent = `🧪 Datos de ejemplo: teléfono ${RUTA_PRUEBA.repositor.telefono} · PIN 1234`
       return mostrar('v-ingreso')
     }
     const dow = new Date().getDay()
@@ -503,6 +507,12 @@
   $('form-venc').addEventListener('submit', guardarVenc)
   $('vc-vence').addEventListener('input', mostrarEtapa)
   $('form-ingreso').addEventListener('submit', entrar)
+  $('btn-volver').addEventListener('click', () => {
+    const demo = E.ruta?.repositor.id === RUTA_PRUEBA.repositor.id
+    const hay = E.registros.length + (demo ? 0 : E.articulos.length)
+    if (hay && !confirm(`En el teléfono hay ${hay} registros guardados de ${E.ruta.repositor.nombre}. Si volvés al inicio se borran. ¿Seguro?`)) return
+    E = nuevo(); guardar(); $('inicio-error').textContent = ''; arrancar()
+  })
   $('form-novisita').addEventListener('submit', guardarNoVisita)
   $('btn-enviar').addEventListener('click', enviar)
   $('dias').addEventListener('click', e => { const b = e.target.closest('.dia'); if (b) { diaVista = +b.dataset.dia; pintar() } })
