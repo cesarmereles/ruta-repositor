@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1565C0">
+  <meta name="description" content="Hoja de ruta del repositor de Logicom: entrada, salida y visitas, sin internet.">
+  <title>Ruta Repositor</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icono.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icono-192.png">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <!-- 1) Sin ruta: cargar el archivo que manda la oficina -->
+  <main id="v-inicio" class="vista centro" hidden>
+    <img src="icono.svg" alt="" class="logo">
+    <h1>Ruta Repositor</h1>
+    <p class="tenue">Abrí el archivo de ruta que te mandó la oficina por WhatsApp.</p>
+    <label class="btn btn-prim btn-grande">📂 Cargar mi ruta
+      <input type="file" id="archivo-ruta" accept=".json,application/json" hidden>
+    </label>
+    <button type="button" class="btn btn-sec" id="btn-demo">🧪 Probar con datos de ejemplo</button>
+    <p id="inicio-error" class="error" role="alert"></p>
+  </main>
+
+  <!-- 2) Ingreso: teléfono + PIN -->
+  <main id="v-ingreso" class="vista centro" hidden>
+    <img src="icono.svg" alt="" class="logo">
+    <h1 id="ingreso-nombre">Hola</h1>
+    <form id="form-ingreso" class="form" autocomplete="off">
+      <label>Tu teléfono
+        <input id="in-tel" type="tel" inputmode="numeric" placeholder="Ej: 3764123456" required>
+      </label>
+      <label>PIN
+        <input id="in-pin" type="password" inputmode="numeric" maxlength="4" pattern="\d{4}" placeholder="4 números" required>
+      </label>
+      <button class="btn btn-prim btn-grande">Entrar</button>
+      <p id="ingreso-error" class="error" role="alert"></p>
+    </form>
+  </main>
+
+  <!-- 3) La ruta del día -->
+  <div id="v-ruta" class="vista" hidden>
+    <header class="barra">
+      <div>
+        <strong id="r-nombre"></strong>
+        <span id="r-fecha" class="tenue"></span>
+      </div>
+      <button type="button" class="btn-icono" id="btn-menu" aria-label="Menú" aria-expanded="false">☰</button>
+    </header>
+    <nav class="secciones" aria-label="Secciones">
+      <button type="button" class="seccion" data-sec="ruta" aria-pressed="true">🗺️ Ruta</button>
+      <button type="button" class="seccion" data-sec="venc" aria-pressed="false">📦 Vencimientos <span id="venc-cuenta" class="cuenta" hidden></span></button>
+    </nav>
+    <div id="sec-ruta">
+      <nav class="dias" id="dias" aria-label="Días de la semana"></nav>
+      <section class="resumen" id="resumen" aria-live="polite"></section>
+      <main id="lista" class="lista"></main>
+    </div>
+    <div id="sec-venc" hidden>
+      <section class="venc-cab">
+        <p class="tenue">Productos que encontraste con fecha corta. Actualizalos en cada visita.</p>
+        <button type="button" class="btn btn-prim" id="btn-nuevo-venc">➕ Cargar producto</button>
+      </section>
+      <main id="venc-lista" class="lista"></main>
+    </div>
+    <footer class="pie">
+      <button type="button" class="btn btn-wa btn-grande" id="btn-enviar">📲 Enviar a la oficina</button>
+    </footer>
+  </div>
+
+  <!-- Menú -->
+  <dialog id="d-menu" class="hoja">
+    <h2>Menú</h2>
+    <p id="menu-info" class="tenue"></p>
+    <label class="btn btn-sec">📂 Cargar ruta nueva
+      <input type="file" id="archivo-ruta-2" accept=".json,application/json" hidden>
+    </label>
+    <button type="button" class="btn btn-sec" id="btn-copia">💾 Guardar copia en archivo</button>
+    <button type="button" class="btn btn-sec" id="btn-borrar-env">🗑️ Borrar lo ya enviado</button>
+    <button type="button" class="btn btn-sec" id="btn-salir">🚪 Salir</button>
+    <button type="button" class="btn btn-link" data-cerrar>Cerrar</button>
+  </dialog>
+
+  <!-- No visitado -->
+  <dialog id="d-novisita" class="hoja">
+    <form id="form-novisita" method="dialog">
+      <h2>No pude visitar</h2>
+      <p id="nv-cliente" class="tenue"></p>
+      <fieldset id="nv-motivos" class="motivos"><legend>¿Qué pasó?</legend></fieldset>
+      <label>Comentario
+        <textarea id="nv-comentario" rows="3" maxlength="300" placeholder="Contá qué pasó"></textarea>
+      </label>
+      <p id="nv-error" class="error" role="alert"></p>
+      <div class="fila-btn">
+        <button type="button" class="btn btn-link" data-cerrar>Cancelar</button>
+        <button type="submit" class="btn btn-prim" value="ok">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Cargar / actualizar un vencimiento -->
+  <dialog id="d-venc" class="hoja">
+    <form id="form-venc" method="dialog">
+      <h2 id="venc-titulo">Cargar producto</h2>
+      <label>Cliente
+        <select id="vc-cliente" required></select>
+      </label>
+      <label>Producto
+        <input id="vc-producto" list="vc-catalogo" maxlength="120" placeholder="Buscá o escribí el producto" required>
+        <datalist id="vc-catalogo"></datalist>
+      </label>
+      <div class="dos-col">
+        <label>Cantidad
+          <input id="vc-cantidad" type="number" inputmode="numeric" min="0" max="9999" step="1" required>
+        </label>
+        <label>Vence
+          <input id="vc-vence" type="date" required>
+        </label>
+      </div>
+      <label id="vc-estado-l" hidden>¿Cómo sigue?
+        <select id="vc-estado">
+          <option value="activo">Sigue en el negocio</option>
+          <option value="vendido">Ya se vendió todo</option>
+          <option value="regalado">Se regaló (acción)</option>
+          <option value="retirado">Se retiró</option>
+        </select>
+      </label>
+      <label>Nota
+        <input id="vc-nota" maxlength="200" placeholder="Opcional">
+      </label>
+      <p id="vc-etapa" class="etapa-info"></p>
+      <p id="vc-error" class="error" role="alert"></p>
+      <div class="fila-btn">
+        <button type="button" class="btn btn-link" data-cerrar>Cancelar</button>
+        <button type="submit" class="btn btn-prim" value="ok">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="aviso" class="aviso" role="status" hidden></div>
+
+  <script src="datos-prueba.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
