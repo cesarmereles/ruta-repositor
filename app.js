@@ -6,6 +6,7 @@
  */
 (() => {
   'use strict'
+  const VERSION_APP = 'rr-v5'   // igual que VERSION en sw.js
   const CLAVE = 'rr-estado-v1'
   const DIAS = ['', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
   const DIAS_LARGO = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
@@ -530,7 +531,7 @@
   })
   $('btn-menu').addEventListener('click', () => {
     const r = E.ruta, n = E.registros.length
-    $('menu-info').textContent = `${r.repositor.nombre} · ${r.visitas.length} visitas en la ruta · ${n} registros en el teléfono${E.ultimo_envio ? ' · último envío ' + E.ultimo_envio.slice(0, 16).replace('T', ' ') : ''}`
+    $('menu-info').textContent = `${r.repositor.nombre} · ${r.visitas.length} visitas en la ruta · ${n} registros en el teléfono${E.ultimo_envio ? ' · último envío ' + E.ultimo_envio.slice(0, 16).replace('T', ' ') : ''} · versión ${VERSION_APP}`
     $('d-menu').showModal()
   })
   $('btn-copia').addEventListener('click', () => { const { datos, archivo } = armarArchivo(); if (!datos.registros.length && !datos.articulos.length) return avisar('No hay nada para guardar.'); descargar(archivo); avisar('💾 Copia guardada en Descargas.') })
@@ -544,7 +545,13 @@
   for (const b of document.querySelectorAll('[data-cerrar]')) b.addEventListener('click', () => b.closest('dialog').close())
 
   // ---------- Sin internet ----------
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {})
+  // Cuando se instala una versión nueva, la app se recarga sola (una vez) para usarla
+  if ('serviceWorker' in navigator) {
+    const habia = !!navigator.serviceWorker.controller
+    let recargada = false
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (habia && !recargada) { recargada = true; location.reload() } })
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(reg => reg.update()).catch(() => {})
+  }
   navigator.storage?.persist?.().catch(() => {})
 
   arrancar()
