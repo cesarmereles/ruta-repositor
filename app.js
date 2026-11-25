@@ -459,8 +459,9 @@
       // Foto de todos los productos (la oficina se queda con la última versión de cada uid)
       articulos: E.articulos.map(({ enviado, ...a }) => ({ ...a, dias: diasPara(a.vence), etapa: etapaDe(a) }))
     }
-    const nombre = `registro-${r.nombre.replace(/[^A-Za-z0-9]+/g, '-')}-${hoy()}-${datos.generado.slice(11, 16).replace(':', '')}.json`
-    return { datos, nombre, archivo: new File([JSON.stringify(datos, null, 1)], nombre, { type: 'application/json' }) }
+    const nombre = `registro-${r.nombre.replace(/[^A-Za-z0-9]+/g, '-')}-${hoy()}-${datos.generado.slice(11, 16).replace(':', '')}.txt`
+    // .txt y no .json: Chrome en Android no deja compartir .json (da "Permission denied"). Adentro sigue siendo JSON.
+    return { datos, nombre, archivo: new File([JSON.stringify(datos, null, 1)], nombre, { type: 'text/plain' }) }
   }
   function descargar(archivo) {
     const a = document.createElement('a'); a.href = URL.createObjectURL(archivo); a.download = archivo.name
@@ -479,9 +480,9 @@
     if (curso && !confirm(`La visita a ${curso.nombre} sigue abierta y no va en este envío. ¿Enviar lo demás?`)) return
     if (navigator.canShare && navigator.canShare({ files: [archivo] })) {
       try {
-        await navigator.share({ files: [archivo], title: 'Registro de visitas', text: `Registro de ${E.ruta.repositor.nombre} · ${hoy().split('-').reverse().join('/')}` })
+        await navigator.share({ files: [archivo], title: 'Registro de visitas' })   // sin text: algunos WhatsApp descartan el archivo si va con texto
         marcarEnviados(); avisar('✅ Listo. Elegiste a quién mandarlo: tiene que ser el WhatsApp de la oficina.', 5000)
-      } catch (e) { if (e.name !== 'AbortError') avisar('⚠️ No se pudo compartir. Probá con “Guardar copia en archivo”.', 6000) }
+      } catch (e) { if (e.name !== 'AbortError') avisar(`⚠️ No se pudo compartir (${e.name}). Probá con “Guardar copia en archivo” en el menú ☰.`, 8000) }
     } else {
       descargar(archivo)
       if (confirm('Este teléfono no deja compartir directo. Se guardó el archivo en Descargas: mandalo por WhatsApp a la oficina. ¿Ya lo mandaste?')) marcarEnviados()
@@ -532,7 +533,7 @@
     $('menu-info').textContent = `${r.repositor.nombre} · ${r.visitas.length} visitas en la ruta · ${n} registros en el teléfono${E.ultimo_envio ? ' · último envío ' + E.ultimo_envio.slice(0, 16).replace('T', ' ') : ''}`
     $('d-menu').showModal()
   })
-  $('btn-copia').addEventListener('click', () => { const { datos, archivo } = armarArchivo(); if (!datos.registros.length) return avisar('No hay registros para guardar.'); descargar(archivo); avisar('💾 Copia guardada en Descargas.') })
+  $('btn-copia').addEventListener('click', () => { const { datos, archivo } = armarArchivo(); if (!datos.registros.length && !datos.articulos.length) return avisar('No hay nada para guardar.'); descargar(archivo); avisar('💾 Copia guardada en Descargas.') })
   $('btn-borrar-env').addEventListener('click', () => {
     const viejos = E.registros.filter(x => x.enviado && x.fecha < hoy())
     if (!viejos.length) return avisar('No hay registros enviados de días anteriores.')
