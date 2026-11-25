@@ -1,5 +1,5 @@
 // Guarda la app en el teléfono para que abra sin internet. Cambiar VERSION (y VERSION_APP en app.js) en cada actualización.
-const VERSION = 'rr-v5'
+const VERSION = 'rr-v6'
 const ARCHIVOS = ['./', 'index.html', 'app.css', 'app.js', 'datos-prueba.js', 'manifest.webmanifest', 'icono.svg', 'icono-192.png', 'icono-512.png']
 
 // cache: 'reload' = pedirlo al servidor sí o sí. GitHub Pages manda max-age=600 y, sin esto,

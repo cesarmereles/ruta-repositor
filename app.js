@@ -6,7 +6,7 @@
  */
 (() => {
   'use strict'
-  const VERSION_APP = 'rr-v5'   // igual que VERSION en sw.js
+  const VERSION_APP = 'rr-v6'   // igual que VERSION en sw.js
   const CLAVE = 'rr-estado-v1'
   const DIAS = ['', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
   const DIAS_LARGO = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
@@ -287,7 +287,7 @@
     const html = visitas.map(v => {
       const reg = registroDe(fecha, v)
       let t = ''
-      if (v.turno !== turnoAnt) { t = `<h2 class="turno">${esc(v.turno || 'SIN TURNO')}</h2>`; turnoAnt = v.turno }
+      if (v.turno !== turnoAnt) { t = v.turno || turnoAnt ? `<h2 class="turno">${esc(v.turno || 'SIN TURNO')}</h2>` : ''; turnoAnt = v.turno }
       const mapa = v.lat != null ? `<a href="https://www.google.com/maps/search/?api=1&query=${v.lat},${v.lng}" target="_blank" rel="noopener">🗺️ Mapa</a>` : ''
       const cab = `<h3>${esc(v.nombre)}</h3><div class="dir">${esc(v.direccion || '')} ${mapa}</div>`
       let clase = '', cuerpo = ''
